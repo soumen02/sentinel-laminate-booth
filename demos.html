@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Laminate review tools in action: LesionView and CvsView screen recordings.">
+<meta name="theme-color" content="#0E1112">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Laminate · Review Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: same Sentinel dark system as the story page. Landscape: tool picker + clip list left, player right. Portrait: player on top, clips below. Built for a touch kiosk. */
+:root{
+  --bg:#0E1112; --surface:#161A1C; --hair:#262A2C; --hair-strong:#353A3D;
+  --ink:#EDEAE2; --muted:#8A8F92; --subtle:#5C6166;
+  --accent:#5C9A93; --accent-soft:#1E2E2C; --signal:#F08A3C;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --s-h1:clamp(34px,3.6vw,58px); --s-body:clamp(15px,1.15vw,19px); --s-label:clamp(11px,.85vw,13px);
+  color-scheme:dark;
+}
+html{background:var(--bg);overscroll-behavior:none;-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  overscroll-behavior:none;touch-action:pan-y;-webkit-tap-highlight-color:transparent;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+img,video{max-width:100%;display:block}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.mono{font-family:var(--mono);font-size:var(--s-label);letter-spacing:.14em;text-transform:uppercase}
+.wm{position:fixed;z-index:0;pointer-events:none;width:110vmax;right:-40vmax;top:-18vmax;opacity:.045}
+.wm path,.wm use{fill:var(--accent)}
+
+.bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-block:16px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+.bar a.home{display:block}
+.logo{height:clamp(38px,4vw,54px);width:auto;display:block}
+.back{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:12px;padding:14px 20px 14px 16px;border:1px solid var(--hair-strong);border-radius:999px;
+  font-family:var(--mono);font-size:var(--s-label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.back svg{width:16px;height:16px}
+
+main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,2fr);gap:clamp(20px,2.6vw,44px);align-items:start;
+  padding-block:4px 24px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+.side{display:flex;flex-direction:column;gap:22px;min-width:0}
+.intro{display:flex;flex-direction:column;gap:12px}
+.intro .mono{color:var(--accent)}
+h1{margin:0;font-size:var(--s-h1);font-weight:600;letter-spacing:-.03em;line-height:1.02;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+.intro p{margin:0;color:var(--muted);font-size:var(--s-body);line-height:1.5;max-width:40ch}
+
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border:1px solid var(--hair-strong);border-radius:14px;background:var(--surface)}
+.tools button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:10px;min-width:0}
+.tools b{font-size:clamp(16px,1.25vw,20px);font-weight:600;letter-spacing:-.01em}
+.tools span{font-family:var(--mono);font-size:var(--s-label);letter-spacing:.1em;text-transform:uppercase;color:var(--subtle)}
+.tools button[aria-selected="true"]{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.tools button[aria-selected="true"] span{color:var(--accent)}
+
+.clips{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.clip{all:unset;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--hair);position:relative;overflow:hidden;width:100%;box-sizing:border-box}
+.clip img{width:clamp(96px,8.5vw,140px);aspect-ratio:1920/1060;object-fit:cover;border-radius:6px;background:var(--surface)}
+.clip .t{display:flex;flex-direction:column;gap:4px;min-width:0}
+.clip .n{font-family:var(--mono);font-size:var(--s-label);letter-spacing:.12em;color:var(--subtle)}
+.clip b{font-size:clamp(15px,1.15vw,19px);font-weight:600;letter-spacing:-.01em}
+.clip small{font-size:clamp(13px,.95vw,15px);color:var(--muted);line-height:1.4}
+.clip .bar2{position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--accent)}
+.clip[aria-current="true"]{border-color:var(--hair-strong);background:var(--surface)}
+.clip[aria-current="true"] .n{color:var(--accent)}
+
+.player{position:relative;min-width:0;display:flex;flex-direction:column;gap:12px}
+.frame{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--hair-strong);background:#000;aspect-ratio:1920/1060;max-height:calc(100dvh - 190px);margin-inline:auto;width:100%}
+.frame video{width:100%;height:100%;object-fit:contain;background:#000}
+.chip{position:absolute;right:14px;bottom:14px;padding:8px 14px;border-radius:999px;background:rgba(14,17,18,.82);border:1px solid var(--hair-strong);color:var(--ink);pointer-events:none}
+.chip b{color:var(--accent);font-weight:500}
+.ctrl{display:flex;align-items:center;gap:14px}
+.pp{all:unset;cursor:pointer;width:48px;height:48px;border-radius:50%;border:1px solid var(--hair-strong);display:grid;place-items:center;flex:0 0 auto}
+.pp svg{width:18px;height:18px;fill:var(--ink)}
+.prog{flex:1;height:4px;border-radius:4px;background:var(--hair);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--accent)}
+.cap{color:var(--muted);font-size:var(--s-body);line-height:1.45;min-height:2.9em;margin:0}
+.cap b{color:var(--ink);font-weight:600}
+
+.foot{position:relative;z-index:1;padding-block:14px 22px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));color:var(--subtle);font-size:13px;line-height:1.5}
+
+/* portrait kiosk / phones */
+.portrait main{grid-template-columns:minmax(0,1fr)}
+.portrait .player{order:2}
+.portrait .side{display:contents}
+.portrait .intro{order:1}
+.portrait .tools{order:2}
+.portrait .player{order:3}
+.portrait .clips{order:4}
+.portrait .frame{max-height:none}
+/* short landscape (e.g. 1422 x 624): tighter chrome */
+.short .bar{padding-block:10px}
+.short .intro p,.short .cap,.short .clip small{display:none}
+.short main{gap:28px;padding-block:0 8px}
+.short .side{gap:14px}
+.short h1{font-size:clamp(28px,2.6vw,40px)}
+.short .tools button{padding:9px 12px}
+.short .clips{gap:6px}
+.short .clip{padding:7px;gap:12px}
+.short .clip img{width:84px}
+.short .frame{max-height:calc(100dvh - 142px)}
+.short .foot{padding-block:6px 10px;font-size:12px}
+@media (max-width:560px){.bar,main,.foot{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}.tools{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg class="wm" viewBox="124 -3 93 92" aria-hidden="true"><use href="#brain"/></svg>
+<header class="bar">
+  <a class="home" href="./" id="home" aria-label="Back to the Laminate story"><svg class="logo" viewBox="0 0 215 134" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sentinel Cloud Service"><path id="brain" fill-rule="evenodd" clip-rule="evenodd" d="M177.3 0.1C174.8 0.3 172.3 0.9 170.4 2.5C169.9 2.9 169.4 3.4 168.9 3.5C168.4 3.6 167.9 3.3 167.3 3.1C166.2 2.7 165.0 2.4 163.8 2.2C159.1 1.3 154.1 1.8 149.7 3.8C147.5 4.8 145.3 6.2 143.5 8.0C141.7 9.6 140.2 11.6 139.4 13.9C139.0 15.0 138.7 16.2 138.4 17.2C138.3 17.7 138.1 18.2 137.7 18.4C137.2 18.7 136.5 18.7 135.9 18.8C134.6 19.0 133.6 19.6 132.5 20.2C131.5 20.9 130.5 21.6 129.7 22.5C126.3 26.2 125.5 32.0 127.5 36.5C128.0 37.7 128.6 38.7 129.3 39.6C130.1 40.6 130.9 41.5 132.0 42.3C132.5 42.6 133.1 42.9 133.3 43.4C133.5 43.8 133.3 44.4 133.1 45.0C132.8 46.2 132.7 47.5 133.0 48.7C133.5 51.0 135.3 53.0 137.5 53.9C139.5 54.8 141.8 54.6 144.0 54.6C149.2 54.4 154.2 54.5 159.0 56.5C160.2 57.0 161.4 57.6 162.6 57.7C162.9 57.7 163.2 57.7 163.4 57.5C163.6 57.4 163.7 57.1 163.7 56.9C163.7 56.4 163.2 56.1 162.7 55.8C160.5 54.8 158.3 54.1 156.1 53.6C153.9 53.1 151.6 52.7 149.3 52.6C146.3 52.5 143.2 52.9 140.2 52.5C139.3 52.4 138.3 52.3 137.5 51.8C136.6 51.3 135.8 50.3 135.3 49.3C134.8 48.3 134.6 47.2 134.8 45.9C134.9 45.3 135.0 44.7 135.4 44.6C135.7 44.4 136.2 44.6 136.6 44.8C137.5 45.1 138.2 45.3 139.0 45.4C139.6 45.5 140.3 45.5 140.9 45.4C141.9 45.3 143.0 44.9 143.7 44.1C144.4 43.3 144.6 42.0 144.3 40.9C143.9 39.8 143.0 39.0 141.9 38.6C139.7 37.9 137.2 39.4 135.5 40.9C135.1 41.3 134.7 41.6 134.2 41.6C133.7 41.5 133.2 40.9 132.6 40.4C131.7 39.5 130.9 38.6 130.3 37.7C127.7 33.9 127.7 28.2 130.5 24.5C131.3 23.4 132.4 22.5 133.6 21.9C134.5 21.3 135.6 20.9 136.8 20.5C137.4 20.3 138.1 20.1 138.5 20.4C138.8 20.7 139.0 21.3 139.2 21.9C139.7 23.0 140.6 23.9 141.7 24.4C142.8 24.9 144.2 25.0 145.2 24.4C146.1 23.8 146.8 22.5 146.6 21.4C146.5 20.4 145.6 19.5 144.6 19.0C144.1 18.7 143.5 18.5 142.9 18.4C142.3 18.4 141.5 18.5 141.0 18.3C140.7 18.2 140.5 17.9 140.4 17.6C140.3 17.0 140.5 16.3 140.8 15.6C141.2 14.3 141.8 13.1 142.5 12.1C143.8 10.1 145.6 8.4 147.6 7.1C151.9 4.4 157.0 3.2 161.9 3.9C163.0 4.0 164.0 4.3 165.2 4.4C165.9 4.6 166.7 4.6 167.1 5.0C167.4 5.3 167.5 5.7 167.5 6.3C167.6 7.4 167.7 8.7 168.1 9.8C168.6 11.0 169.5 11.9 170.6 12.4C171.6 12.9 172.8 13.0 173.8 12.5C174.8 12.0 175.5 10.9 175.5 9.8C175.6 8.5 174.7 7.2 173.7 6.4C173.4 6.1 173.0 5.8 172.6 5.6C172.0 5.2 171.4 4.9 171.3 4.5C171.1 3.8 172.6 3.2 173.9 2.8C175.1 2.4 176.2 2.1 177.3 2.0C179.6 1.7 182.2 1.8 184.7 2.3C189.7 3.2 194.2 5.3 198.4 8.2C202.3 10.9 206.0 14.2 208.4 18.3C211.0 22.5 212.3 27.6 211.3 32.5C210.7 35.0 209.7 37.4 208.0 39.1C207.1 40.0 206.1 40.7 204.8 41.5C203.7 42.2 202.5 42.9 201.7 42.5C201.3 42.2 201.0 41.6 200.8 41.0C200.6 40.4 200.4 39.8 200.1 39.3C199.5 38.3 198.7 37.3 197.6 36.9C195.5 35.9 192.6 37.2 191.8 39.3C191.1 41.4 192.6 44.2 194.8 44.9C195.9 45.3 197.2 45.2 198.4 45.2C198.9 45.2 199.3 45.2 199.6 45.5C199.9 46.0 199.7 47.0 199.4 47.9C198.5 50.5 196.8 52.0 194.5 53.0C192.3 54.0 189.5 54.4 187.3 53.7C185.3 53.0 183.8 51.3 182.5 49.5C181.1 47.4 180.0 45.2 178.3 43.5C176.6 41.9 174.4 40.8 172.2 40.0C169.4 39.0 166.6 38.5 164.4 36.7C163.7 36.2 163.0 35.5 162.7 34.7C162.2 33.7 162.2 32.4 162.3 31.3C162.6 28.8 163.6 26.8 165.1 24.4C165.5 23.8 165.9 23.2 166.4 23.0C166.8 22.8 167.2 23.0 167.6 23.3C168.4 24.0 169.2 25.0 169.9 26.0C171.7 28.3 173.1 30.4 174.9 32.5C177.9 36.0 182.1 39.3 186.6 38.8C189.1 38.5 191.7 37.2 193.1 35.2C193.4 34.9 193.6 34.6 193.7 34.3C194.0 33.7 194.1 33.1 194.4 32.7C195.0 31.7 196.4 31.7 197.7 31.4C200.0 30.8 201.8 28.9 202.4 26.6C203.0 24.3 202.3 21.6 201.0 19.5C198.4 15.5 193.5 13.8 188.7 13.3C183.5 12.8 178.6 13.6 173.8 15.6C172.7 16.1 171.5 16.7 170.4 17.2C169.9 17.5 169.4 17.8 168.9 18.2C168.5 18.6 168.0 19.1 167.5 19.3C167.0 19.5 166.5 19.5 166.1 19.2C165.5 19.0 165.1 18.5 164.5 18.1C163.5 17.4 162.4 16.8 161.2 16.5C158.9 15.9 156.4 16.4 154.2 17.4C152.0 18.5 150.2 20.1 148.8 22.2C147.4 24.2 146.6 26.5 146.6 28.9C146.7 31.3 147.7 33.8 149.3 35.6C150.8 37.3 152.9 38.5 155.0 39.4C157.4 40.4 159.9 41.2 162.1 42.5C162.9 43.0 163.6 43.5 164.3 44.0C164.6 44.2 164.9 44.4 164.9 44.5C164.9 44.6 164.7 44.7 164.6 44.8C163.7 45.4 162.5 46.2 161.9 47.3C160.8 49.3 162.3 52.4 164.4 53.2C166.5 54.0 169.2 52.9 170.0 50.7C170.2 50.2 170.3 49.7 170.2 49.1C170.2 48.4 169.9 47.8 169.6 47.1C169.5 46.8 169.4 46.5 169.5 46.4C169.6 46.3 169.7 46.3 169.9 46.3C170.4 46.4 171.0 46.7 171.6 47.1C173.7 48.5 175.1 50.8 175.1 53.2C175.2 55.4 174.1 57.6 172.6 59.1C170.7 60.9 168.2 61.7 166.0 63.1C163.9 64.4 162.1 66.2 160.9 68.3C159.7 70.4 159 73 159 75V86H164.6V75C164.6 73 164.7 70.9 165.4 68.4C165.7 67.1 166.3 65.9 167.1 65.0C168.0 64.0 169.4 63.4 170.6 62.7C172.6 61.6 174.5 60.3 175.6 58.4C176.9 56.3 177.3 53.7 176.7 51.3C176.2 48.9 174.7 46.8 172.6 45.5C171.6 44.8 170.4 44.4 169.2 44.3C168.6 44.2 167.9 44.2 167.3 43.9C166.8 43.7 166.4 43.3 166.0 42.9C165.0 42.0 163.9 41.4 162.7 40.7C161.7 40.1 160.7 39.5 159.6 39.1C157.3 38.0 154.8 37.5 152.8 36.1C150.8 34.7 149.3 32.6 148.8 30.4C148.2 28.1 148.9 25.5 150.2 23.4C151.6 21.4 153.6 19.7 155.8 18.9C158.0 18.0 160.5 18.0 162.9 19.2C164.1 19.8 165.3 20.7 165.0 21.6C164.8 22.1 164.0 22.7 163.5 23.3C163.2 23.7 163.0 24.1 162.8 24.5C161.7 26.5 160.6 28.7 160.3 31.0C160.1 33.6 161.1 36.3 162.9 38.1C164.5 39.6 166.8 40.3 169.2 41.0C171.5 41.7 173.8 42.5 175.7 43.9C177.6 45.3 179.0 47.5 180.4 49.6C181.8 51.7 183.1 53.9 185.2 54.9C187.2 56.0 189.9 56.1 192.4 55.6C194.9 55.2 197.0 54.2 198.9 52.4C199.7 51.6 200.5 50.6 200.9 49.4C201.4 48.2 201.4 46.8 201.6 45.6C201.7 45.2 201.8 44.8 202.1 44.5C202.5 44.2 203.1 44.1 203.7 44.0C205.1 43.6 206.3 43.0 207.3 42.2C209.3 40.8 210.9 38.9 211.9 36.7C214.1 32.2 214.0 26.7 212.3 22.0C210.7 17.4 207.6 13.5 203.9 10.1C196.7 3.5 187.2 -0.7 177.3 0.1ZM169.6 6.6C169.2 7.3 169.7 8.8 170.3 9.7C170.6 10.2 171.0 10.5 171.5 10.7C172.1 10.9 172.8 10.9 173.2 10.5C173.6 10.2 173.6 9.5 173.4 9.0C173.2 8.5 172.7 8.1 172.3 7.8C171.8 7.4 171.4 7.1 170.8 6.7C170.6 6.5 170.3 6.4 170.1 6.3C170.0 6.3 169.9 6.3 169.8 6.4C169.7 6.4 169.7 6.5 169.6 6.6ZM183.4 15.2C178.3 15.6 173.3 17.2 169.3 20.4C169.0 20.6 168.7 20.9 168.6 21.2C168.6 21.5 168.9 21.8 169.2 22.2C169.9 23.0 170.6 23.8 171.2 24.6C173.2 26.9 174.7 29.4 176.7 31.6C178.2 33.4 179.9 35.0 182.0 35.9C184.3 37.0 187.1 37.3 189.4 36.0C190.5 35.4 191.5 34.4 192.1 33.4C192.3 32.9 192.5 32.5 192.3 32.2C192.1 31.9 191.3 31.9 190.6 31.9C189.1 31.8 187.9 31.5 186.7 31.1C185.6 30.7 184.5 30.2 183.5 29.5C182.5 28.9 181.6 28.0 181.2 26.8C180.8 25.7 180.8 24.2 181.3 23.0C182.3 20.7 185.0 19.6 187.4 20.1C189.7 20.6 191.6 22.8 193.0 24.8C193.7 25.7 194.3 26.7 194.5 27.9C194.7 28.6 194.7 29.3 195.0 29.6C195.3 29.9 195.8 29.9 196.4 29.8C197.6 29.6 199.0 28.9 199.8 27.9C200.5 27.0 200.6 25.7 200.6 24.5C200.5 23.2 200.3 22.0 199.8 20.9C199.2 19.8 198.2 18.9 197.1 18.2C193.2 15.4 188.2 14.8 183.4 15.2ZM140.8 20.4C140.6 20.6 141.0 21.2 141.3 21.6C141.6 22.0 141.9 22.4 142.3 22.6C143.1 23.0 144.3 23.0 144.6 22.2C144.7 21.9 144.7 21.5 144.5 21.2C144.3 20.9 143.9 20.7 143.5 20.6C142.7 20.4 142.0 20.2 141.3 20.2C141.1 20.2 140.8 20.3 140.8 20.4ZM184.9 22.0C183.8 22.4 183.0 23.6 182.9 24.8C182.8 25.9 183.4 27.1 184.4 27.8C185.3 28.6 186.5 29.0 187.7 29.3C189.0 29.7 190.3 30.1 191.7 30.1C192.2 30.1 192.7 30.1 192.9 29.8C193.1 29.5 193.0 28.9 192.8 28.4C192.4 27.1 191.7 26.0 190.9 25.0C190.2 24.1 189.4 23.4 188.4 22.7C187.3 22.1 186.0 21.6 184.9 22.0ZM195.0 38.6C193.6 39.0 193.1 41.0 194.0 42.1C194.4 42.5 195.1 42.9 195.7 43.0C196.0 43.2 196.3 43.2 196.7 43.3C197.1 43.3 197.5 43.4 197.9 43.4C198.2 43.4 198.4 43.4 198.6 43.3C198.8 43.3 198.9 43.3 199.0 43.2C199.3 43.0 199.4 42.8 199.4 42.4C199.3 41.8 198.9 41.0 198.5 40.3C198.1 39.7 197.7 39.2 197.1 38.8C196.5 38.5 195.6 38.4 195.0 38.6ZM139.7 40.6C139.0 40.8 138.4 41.1 137.7 41.6C137.2 41.9 136.7 42.3 136.7 42.6C136.7 42.7 136.8 42.8 136.9 42.8C137.0 43.0 137.3 43.0 137.6 43.0C138.4 43.2 138.9 43.4 139.6 43.5C140.9 43.6 142.5 43.2 142.5 42.1C142.5 41.6 142.1 40.8 141.6 40.5C141.0 40.2 140.3 40.4 139.7 40.6ZM166.5 46.4C165.4 46.3 163.8 47.3 163.5 48.6C163.2 49.7 164.1 51.1 165.3 51.4C166.5 51.8 168.0 51.1 168.3 49.8C168.5 49.0 168.2 48.1 167.8 47.4C167.6 47.0 167.4 46.7 167.0 46.5C166.9 46.5 166.7 46.4 166.5 46.4Z" fill="#5C9A93"/><path d="M11.4 105.3C8.8 105.3 6.5 104.8 4.7 103.9C2.8 103.0 1.2 101.7 0 100.2L3.9 96.4C4.9 97.6 6.1 98.6 7.4 99.2C8.7 99.9 10.2 100.2 11.7 100.2C13.5 100.2 14.9 99.8 15.8 99.0C16.7 98.2 17.2 97.2 17.2 95.9C17.2 95.2 17.0 94.6 16.8 94.1C16.5 93.6 16.1 93.1 15.5 92.8C14.9 92.4 14.0 92.1 13.0 92.0L10.1 91.5C8.0 91.2 6.3 90.7 4.9 89.9C3.6 89.1 2.6 88.1 1.9 86.9C1.2 85.7 0.9 84.2 0.9 82.6C0.9 80.8 1.3 79.2 2.2 77.8C3.1 76.5 4.4 75.4 6.1 74.7C7.7 73.9 9.7 73.5 12.0 73.5C14.3 73.5 16.3 73.9 18.1 74.7C19.8 75.5 21.3 76.6 22.5 78.1L18.6 81.8C17.8 80.9 16.9 80.1 15.8 79.5C14.7 78.9 13.3 78.6 11.7 78.6C10.1 78.6 8.8 79.0 8.0 79.6C7.1 80.2 6.7 81.1 6.7 82.2C6.7 83.0 6.8 83.7 7.1 84.2C7.4 84.7 7.9 85.1 8.5 85.4C9.2 85.6 10.0 85.9 11 86.1L13.8 86.6C15.9 87.0 17.6 87.5 19.0 88.3C20.3 89.0 21.3 90.0 22 91.2C22.6 92.4 22.9 93.8 22.9 95.5C22.9 97.5 22.5 99.2 21.6 100.6C20.7 102.1 19.4 103.2 17.6 104.1C15.9 104.9 13.8 105.3 11.4 105.3Z" fill="#EDEAE2"/><path d="M37.7 105.3C35.4 105.3 33.5 104.8 31.9 103.9C30.3 102.9 29.0 101.5 28.1 99.7C27.3 97.9 26.8 95.7 26.8 93.2C26.8 90.8 27.3 88.7 28.1 87.0C29.0 85.1 30.2 83.7 31.8 82.8C33.4 81.8 35.3 81.3 37.5 81.3C39.9 81.3 41.9 81.8 43.4 82.9C44.9 83.9 46.1 85.3 46.8 87.1C47.6 88.8 48.0 90.7 48.0 92.9V94.7H32.7V95.3C32.7 96.9 33.2 98.2 34.1 99.3C35.0 100.3 36.4 100.8 38.3 100.8C39.7 100.8 40.8 100.5 41.7 99.9C42.6 99.3 43.4 98.6 44.1 97.7L47.2 101.1C46.2 102.3 44.9 103.4 43.3 104.2C41.7 104.9 39.8 105.3 37.7 105.3ZM37.6 85.5C36.6 85.5 35.7 85.7 35.0 86.2C34.3 86.6 33.7 87.3 33.3 88.1C32.9 88.9 32.7 89.8 32.7 90.9V91.2H42.1V90.8C42.1 89.7 41.9 88.8 41.6 88.1C41.2 87.3 40.7 86.6 40.0 86.2C39.4 85.7 38.6 85.5 37.6 85.5Z" fill="#EDEAE2"/><path d="M58.6 104.8H52.9V81.8H58.6V85.6H58.8C59.2 84.4 60.0 83.4 61.0 82.6C62.0 81.7 63.4 81.3 65.2 81.3C67.5 81.3 69.4 82.1 70.6 83.7C71.9 85.2 72.5 87.4 72.5 90.3V104.8H66.9V90.8C66.9 89.2 66.6 88.0 66.0 87.2C65.4 86.3 64.5 85.9 63.1 85.9C62.4 85.9 61.6 86.0 60.9 86.3C60.2 86.6 59.7 87.0 59.2 87.6C58.8 88.1 58.6 88.8 58.6 89.6V104.8Z" fill="#EDEAE2"/><path d="M90.0 104.8H86.0C84.0 104.8 82.5 104.3 81.5 103.3C80.5 102.3 80.0 100.8 80.0 98.9V86.3H76.6V81.8H78.4C79.2 81.8 79.8 81.6 80.1 81.2C80.4 80.8 80.6 80.2 80.6 79.4V75.5H85.7V81.8H90.4V86.3H85.7V100.3H90.0V104.8Z" fill="#EDEAE2"/><path d="M98.1 78.5C96.9 78.5 96.1 78.2 95.6 77.7C95.0 77.1 94.8 76.4 94.8 75.6V74.8C94.8 73.9 95.0 73.3 95.6 72.7C96.1 72.2 96.9 72 98.1 72C99.2 72 100.0 72.2 100.6 72.7C101.1 73.3 101.4 73.9 101.4 74.8V75.6C101.4 76.4 101.1 77.1 100.6 77.7C100.0 78.2 99.2 78.5 98.1 78.5ZM95.2 104.8V81.8H100.9V104.8H95.2Z" fill="#EDEAE2"/><path d="M113.0 104.8H107.4V81.8H113.0V85.6H113.2C113.7 84.4 114.4 83.4 115.4 82.6C116.4 81.7 117.9 81.3 119.6 81.3C122.0 81.3 123.8 82.1 125.1 83.7C126.3 85.2 127.0 87.4 127.0 90.3V104.8H121.4V90.8C121.4 89.2 121.1 88.0 120.5 87.2C119.9 86.3 118.9 85.9 117.6 85.9C116.8 85.9 116.1 86.0 115.4 86.3C114.7 86.6 114.1 87.0 113.7 87.6C113.2 88.1 113.0 88.8 113.0 89.6V104.8Z" fill="#EDEAE2"/><path d="M142.5 105.3C140.3 105.3 138.3 104.8 136.7 103.9C135.1 102.9 133.8 101.5 133.0 99.7C132.1 97.9 131.7 95.7 131.7 93.2C131.7 90.8 132.1 88.7 133.0 87.0C133.8 85.1 135.0 83.7 136.6 82.8C138.2 81.8 140.1 81.3 142.3 81.3C144.7 81.3 146.7 81.8 148.2 82.9C149.8 83.9 150.9 85.3 151.7 87.1C152.4 88.8 152.8 90.7 152.8 92.9V94.7H137.5V95.3C137.5 96.9 138.0 98.2 139.0 99.3C139.9 100.3 141.3 100.8 143.1 100.8C144.5 100.8 145.7 100.5 146.6 99.9C147.5 99.3 148.3 98.6 149.0 97.7L152.0 101.1C151.1 102.3 149.8 103.4 148.1 104.2C146.5 104.9 144.7 105.3 142.5 105.3ZM142.4 85.5C141.4 85.5 140.6 85.7 139.8 86.2C139.1 86.6 138.5 87.3 138.1 88.1C137.7 88.9 137.5 89.8 137.5 90.9V91.2H147.0V90.8C147.0 89.7 146.8 88.8 146.4 88.1C146.1 87.3 145.6 86.6 144.9 86.2C144.2 85.7 143.4 85.5 142.4 85.5Z" fill="#EDEAE2"/><path d="M167.6 105.3H164.6C162.7 105.3 161.3 104.8 160.3 103.9C159.4 102.9 159 101.5 159 99.8V86H164.6V100.8H167.6V105.3Z" fill="#5C9A93"/><path d="M4.8 129.1C4.0 129.1 3.2 128.9 2.6 128.6C2.0 128.2 1.5 127.6 1.2 126.9C0.9 126.1 0.7 125.2 0.7 124.1C0.7 123.0 0.9 122.1 1.2 121.3C1.5 120.6 2.0 120.0 2.6 119.6C3.2 119.2 4.0 119.0 4.8 119.0C5.7 119.0 6.4 119.2 6.9 119.6C7.5 119.9 8.0 120.5 8.3 121.2L7.0 122C6.8 121.5 6.5 121.1 6.2 120.8C5.8 120.6 5.4 120.4 4.8 120.4C4.1 120.4 3.5 120.7 3.0 121.2C2.6 121.7 2.4 122.4 2.4 123.4V124.8C2.4 125.7 2.6 126.4 3.0 126.9C3.5 127.5 4.1 127.7 4.8 127.7C5.4 127.7 5.9 127.6 6.3 127.3C6.6 126.9 6.9 126.6 7.1 126.1L8.4 126.9C8.0 127.6 7.6 128.1 7.0 128.5C6.4 128.9 5.7 129.1 4.8 129.1ZM12.4 129H11.5C11.0 129 10.6 128.8 10.3 128.5C10.0 128.3 9.9 127.9 9.9 127.4V118.6H11.4V127.7H12.4V129ZM16.7 129.1C16.1 129.1 15.5 129.0 15.0 128.7C14.5 128.3 14.1 127.9 13.8 127.3C13.5 126.8 13.4 126.1 13.4 125.3C13.4 124.5 13.5 123.9 13.8 123.3C14.1 122.7 14.5 122.3 15.0 122.0C15.5 121.7 16.1 121.5 16.7 121.5C17.4 121.5 18.0 121.7 18.5 122.0C19.0 122.3 19.4 122.7 19.7 123.3C19.9 123.9 20.1 124.5 20.1 125.3C20.1 126.1 19.9 126.8 19.7 127.3C19.4 127.9 19.0 128.3 18.5 128.7C18.0 129.0 17.4 129.1 16.7 129.1ZM16.7 127.8C17.3 127.8 17.7 127.7 18.0 127.4C18.3 127.0 18.5 126.6 18.5 125.9V124.7C18.5 124.1 18.3 123.6 18.0 123.3C17.7 122.9 17.3 122.8 16.7 122.8C16.2 122.8 15.8 122.9 15.5 123.3C15.2 123.6 15.0 124.1 15.0 124.7V125.9C15.0 126.6 15.2 127.0 15.5 127.4C15.8 127.7 16.2 127.8 16.7 127.8ZM26.2 129V127.7H26.1C26.0 128.1 25.8 128.4 25.4 128.7C25.1 129.0 24.7 129.1 24.1 129.1C23.3 129.1 22.7 128.9 22.3 128.4C21.9 127.9 21.7 127.2 21.7 126.3V121.7H23.2V126.1C23.2 126.7 23.3 127.1 23.6 127.4C23.8 127.7 24.1 127.8 24.6 127.8C24.9 127.8 25.1 127.8 25.4 127.7C25.6 127.6 25.8 127.5 26.0 127.3C26.1 127.1 26.2 126.9 26.2 126.6V121.7H27.7V129H26.2ZM34.5 129V127.7H34.4C34.2 128.2 34.0 128.5 33.6 128.8C33.3 129.0 32.8 129.1 32.4 129.1C31.7 129.1 31.2 129.0 30.8 128.7C30.4 128.4 30.0 127.9 29.8 127.4C29.6 126.8 29.5 126.1 29.5 125.3C29.5 124.5 29.6 123.8 29.8 123.3C30.0 122.7 30.4 122.3 30.8 122.0C31.2 121.7 31.7 121.5 32.4 121.5C32.8 121.5 33.3 121.6 33.6 121.9C34.0 122.1 34.2 122.4 34.4 122.9H34.5V118.6H36.0V129H34.5ZM32.8 127.8C33.1 127.8 33.4 127.8 33.6 127.7C33.9 127.6 34.1 127.4 34.2 127.2C34.4 127.0 34.5 126.8 34.5 126.5V124.1C34.5 123.8 34.4 123.6 34.2 123.4C34.1 123.2 33.9 123.1 33.6 123.0C33.4 122.9 33.1 122.8 32.8 122.8C32.3 122.8 31.9 123.0 31.5 123.3C31.2 123.7 31.1 124.1 31.1 124.7V125.9C31.1 126.5 31.2 127.0 31.5 127.3C31.9 127.7 32.3 127.8 32.8 127.8ZM44.5 129.1C43.7 129.1 43.0 129.0 42.4 128.7C41.9 128.4 41.4 128.0 41.0 127.5L42.1 126.4C42.4 126.9 42.8 127.2 43.2 127.4C43.6 127.6 44.1 127.7 44.6 127.7C45.2 127.7 45.7 127.6 46.0 127.3C46.3 127.0 46.5 126.6 46.5 126.2C46.5 125.9 46.4 125.7 46.4 125.5C46.3 125.3 46.1 125.2 45.9 125.0C45.7 124.9 45.4 124.8 45.0 124.8L44.1 124.6C43.5 124.5 42.9 124.3 42.5 124.1C42.1 123.8 41.8 123.5 41.6 123.2C41.4 122.8 41.2 122.3 41.2 121.8C41.2 121.2 41.4 120.7 41.7 120.3C41.9 119.9 42.3 119.6 42.9 119.3C43.4 119.1 44.0 119.0 44.7 119.0C45.4 119.0 46.1 119.1 46.6 119.4C47.1 119.7 47.6 120.0 48.0 120.5L46.9 121.5C46.6 121.2 46.3 120.9 45.9 120.7C45.6 120.5 45.1 120.4 44.6 120.4C44.0 120.4 43.6 120.5 43.3 120.7C43.0 121.0 42.8 121.3 42.8 121.7C42.8 122.0 42.9 122.2 43.0 122.4C43.1 122.6 43.3 122.7 43.5 122.8C43.7 122.9 44.0 123.0 44.4 123.1L45.2 123.3C45.9 123.4 46.4 123.6 46.8 123.8C47.3 124.1 47.6 124.4 47.8 124.8C48.0 125.1 48.1 125.6 48.1 126.1C48.1 126.7 47.9 127.2 47.7 127.7C47.4 128.1 47.0 128.5 46.4 128.7C45.9 129.0 45.3 129.1 44.5 129.1ZM52.7 129.1C52.0 129.1 51.4 129.0 50.9 128.7C50.4 128.3 50.0 127.9 49.8 127.3C49.5 126.8 49.4 126.1 49.4 125.3C49.4 124.5 49.5 123.9 49.8 123.3C50.0 122.7 50.4 122.3 50.9 122.0C51.4 121.7 52.0 121.5 52.7 121.5C53.4 121.5 54.0 121.7 54.5 122.0C55.0 122.3 55.3 122.7 55.6 123.3C55.8 123.8 55.9 124.5 55.9 125.1V125.7H51.0V125.9C51.0 126.5 51.1 127.0 51.4 127.3C51.8 127.7 52.3 127.9 52.9 127.9C53.3 127.9 53.7 127.8 54.0 127.6C54.3 127.4 54.6 127.1 54.8 126.8L55.7 127.6C55.4 128.1 55.0 128.4 54.5 128.7C54.0 129.0 53.4 129.1 52.7 129.1ZM52.7 122.7C52.4 122.7 52.1 122.8 51.8 122.9C51.5 123.1 51.3 123.3 51.2 123.6C51.0 123.9 51.0 124.2 51.0 124.6V124.7H54.3V124.6C54.3 124.2 54.3 123.9 54.1 123.6C54.0 123.3 53.8 123.1 53.6 122.9C53.3 122.8 53.1 122.7 52.7 122.7ZM59.2 129H57.6V121.7H59.2V123.1H59.2C59.3 122.9 59.4 122.6 59.6 122.4C59.7 122.2 60.0 122.0 60.2 121.9C60.5 121.7 60.8 121.7 61.2 121.7H61.6V123.1H61.0C60.6 123.1 60.3 123.2 60.0 123.3C59.7 123.4 59.5 123.5 59.4 123.7C59.2 123.8 59.2 124.1 59.2 124.3V129ZM66.5 129H64.7L62.2 121.7H63.7L64.8 125.0L65.6 127.5H65.7L66.4 125.0L67.5 121.7H69.0L66.5 129ZM71.0 120.4C70.7 120.4 70.5 120.3 70.3 120.1C70.2 120.0 70.1 119.8 70.1 119.6V119.3C70.1 119.1 70.2 118.9 70.3 118.8C70.5 118.6 70.7 118.5 71.0 118.5C71.4 118.5 71.6 118.6 71.7 118.8C71.9 118.9 71.9 119.1 71.9 119.3V119.6C71.9 119.8 71.9 120.0 71.7 120.1C71.6 120.3 71.4 120.4 71.0 120.4ZM70.3 129V121.7H71.8V129H70.3ZM76.8 129.1C75.7 129.1 74.9 128.8 74.3 128.1C73.8 127.4 73.5 126.5 73.5 125.3C73.5 124.1 73.8 123.2 74.3 122.5C74.9 121.8 75.7 121.5 76.8 121.5C77.5 121.5 78.1 121.7 78.6 122.0C79.1 122.3 79.4 122.8 79.6 123.3L78.3 123.9C78.2 123.5 78.1 123.3 77.8 123.1C77.5 122.9 77.2 122.8 76.8 122.8C76.2 122.8 75.8 123.0 75.5 123.3C75.2 123.7 75.1 124.1 75.1 124.7V126.0C75.1 126.5 75.2 127.0 75.5 127.3C75.8 127.7 76.2 127.9 76.8 127.9C77.2 127.9 77.6 127.8 77.9 127.5C78.1 127.3 78.3 127.0 78.5 126.7L79.7 127.3C79.4 127.9 79.1 128.3 78.6 128.6C78.1 129.0 77.5 129.1 76.8 129.1ZM83.9 129.1C83.2 129.1 82.6 129.0 82.1 128.7C81.6 128.3 81.2 127.9 80.9 127.3C80.7 126.8 80.5 126.1 80.5 125.3C80.5 124.5 80.7 123.9 80.9 123.3C81.2 122.7 81.6 122.3 82.1 122.0C82.6 121.7 83.2 121.5 83.9 121.5C84.6 121.5 85.2 121.7 85.6 122.0C86.1 122.3 86.5 122.7 86.7 123.3C87.0 123.8 87.1 124.5 87.1 125.1V125.7H82.1V125.9C82.1 126.5 82.3 127.0 82.6 127.3C82.9 127.7 83.4 127.9 84.0 127.9C84.5 127.9 84.9 127.8 85.2 127.6C85.5 127.4 85.7 127.1 85.9 126.8L86.8 127.6C86.6 128.1 86.2 128.4 85.7 128.7C85.2 129.0 84.6 129.1 83.9 129.1ZM83.9 122.7C83.5 122.7 83.2 122.8 82.9 122.9C82.7 123.1 82.5 123.3 82.3 123.6C82.2 123.9 82.1 124.2 82.1 124.6V124.7H85.5V124.6C85.5 124.2 85.4 123.9 85.3 123.6C85.2 123.3 85.0 123.1 84.7 122.9C84.5 122.8 84.2 122.7 83.9 122.7Z" fill="#8A8F92"/></svg></a>
+  <a class="back" href="./" id="back"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 2 4 8l6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to the story</a>
+</header>
+
+<main>
+  <div class="side">
+    <div class="intro">
+      <span class="mono">Laminate · Review tools</span>
+      <h1>See the tools <em>at work.</em></h1>
+      <p>Screen recordings of the two Laminate review apps, running on research MRI data.</p>
+    </div>
+    <div class="tools" role="tablist" aria-label="Choose a tool">
+      <button type="button" role="tab" id="tab-lv" data-tool="lv" aria-selected="true"><b>LesionView</b><span>Longitudinal review</span></button>
+      <button type="button" role="tab" id="tab-cv" data-tool="cv" aria-selected="false"><b>CvsView</b><span>Central vein sign</span></button>
+    </div>
+    <ol class="clips" id="clips" aria-label="Clips"></ol>
+  </div>
+
+  <section class="player" aria-label="Demo player">
+    <div class="frame">
+      <video id="vid" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
+      <span class="chip mono" id="chip"><b>LesionView</b> · 1 / 3</span>
+    </div>
+    <div class="ctrl">
+      <button type="button" class="pp" id="pp" aria-label="Pause"><svg viewBox="0 0 16 16" id="ppIcon"><path d="M4 2h3v12H4zM9 2h3v12H9z"/></svg></button>
+      <div class="prog" aria-hidden="true"><i id="prog"></i></div>
+    </div>
+    <p class="cap" id="cap"></p>
+  </section>
+</main>
+
+<footer class="foot">Screen recordings of LesionView and CvsView. For research and educational use. Not FDA-approved. Not for clinical diagnosis or patient care.</footer>
+
+<script>
+const TOOLS={
+  lv:{name:'LesionView',clips:[
+    {id:'lv-1-mask',title:'Lesion masks',text:'Each lesion’s segmentation is outlined on sagittal, coronal and axial views.',loops:3},
+    {id:'lv-2-timepoints',title:'Time 1 vs Time 2',text:'Switch between visits to see how a lesion changed.',loops:3},
+    {id:'lv-3-new-lesions',title:'New and enlarging lesions',text:'Filter by new, enlarging or stable, step through each lesion, then keep or delete it.',loops:1}]},
+  cv:{name:'CvsView',clips:[
+    {id:'cv-1-lesion',title:'Lesion focus',text:'Zoom into a lesion and overlay its mask.',loops:1},
+    {id:'cv-2-navigate',title:'Lesion navigation',text:'Step through every lesion in the session.',loops:1},
+    {id:'cv-3-central-vein',title:'Central vein sign',text:'Compare FLAIR*, SWI, FLAIR and phase, rate the likelihood of a central vein, and flag paramagnetic rim lesions.',loops:1}]}
+};
+const $=id=>document.getElementById(id), vid=$('vid');
+const tour=new URLSearchParams(location.search).has('tour');
+if(tour){$('back').href='./?tour';$('home').href='./?tour'}
+let tool='lv', idx=0, loopsLeft=1, paused=false, autoplayChain=true, seen=0;
+
+function layout(){const W=innerWidth,H=innerHeight;document.body.classList.toggle('portrait',W<H*1.05);document.body.classList.toggle('short',W>=H*1.05&&H<760)}
+addEventListener('resize',layout);layout();
+
+function renderList(){
+  const t=TOOLS[tool]; $('clips').innerHTML='';
+  t.clips.forEach((c,i)=>{const li=document.createElement('li');
+    li.innerHTML=`<button type="button" class="clip" id="clip-${c.id}" data-i="${i}"><img src="videos/${c.id}.webp" alt="" width="140" height="77" loading="eager"><span class="t"><span class="n">${String(i+1).padStart(2,'0')}</span><b>${c.title}</b><small>${c.text}</small></span><i class="bar2"></i></button>`;
+    $('clips').appendChild(li)});
+  document.querySelectorAll('.tools button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tool===tool)));
+}
+function load(i,play=true){
+  const t=TOOLS[tool], c=t.clips[i]; idx=i; loopsLeft=c.loops;
+  vid.poster=`videos/${c.id}.webp`;
+  vid.innerHTML=`<source src="videos/${c.id}.webm" type="video/webm"><source src="videos/${c.id}.mp4" type="video/mp4">`;
+  vid.load(); if(play&&!paused)vid.play().catch(()=>{});
+  $('chip').innerHTML=`<b>${t.name}</b> · ${i+1} / ${t.clips.length}`;
+  $('cap').innerHTML=`<b>${c.title}.</b> ${c.text}`;
+  document.querySelectorAll('.clip').forEach(el=>el.setAttribute('aria-current',String(+el.dataset.i===i)));
+  // preload the next clip so the hand-off is instant
+  const nx=next(); if(nx){const l=document.createElement('link');l.rel='preload';l.as='video';l.href=`videos/${TOOLS[nx.tool].clips[nx.i].id}.webm`;document.head.appendChild(l)}
+}
+function next(){const t=TOOLS[tool]; if(idx+1<t.clips.length)return{tool,i:idx+1}; return{tool:tool==='lv'?'cv':'lv',i:0}}
+function setTool(tk,i=0,play=true){tool=tk;renderList();load(i,play)}
+vid.addEventListener('ended',()=>{
+  if(--loopsLeft>0){vid.currentTime=0;vid.play().catch(()=>{});return}
+  seen++;
+  if(tour&&seen>=6&&!touched){location.href='./?tour';return}          // kiosk loop: back to the story after both tools
+  const n=next(); if(n.tool!==tool)setTool(n.tool,n.i); else load(n.i);
+});
+vid.addEventListener('timeupdate',()=>{const p=vid.duration?vid.currentTime/vid.duration:0;$('prog').style.width=(p*100)+'%';
+  const cur=document.querySelector('.clip[aria-current="true"] .bar2'); if(cur)cur.style.width=(p*100)+'%'});
+function setPaused(p){paused=p; if(p)vid.pause(); else vid.play().catch(()=>{});
+  $('pp').setAttribute('aria-label',p?'Play':'Pause');$('ppIcon').innerHTML=p?'<path d="M4 2l10 6-10 6z"/>':'<path d="M4 2h3v12H4zM9 2h3v12H9z"/>'}
+$('pp').addEventListener('click',()=>{poke();setPaused(!paused)});
+vid.addEventListener('click',()=>{poke();setPaused(!paused)});
+document.querySelector('.tools').addEventListener('click',e=>{const b=e.target.closest('button[data-tool]');if(!b)return;poke();if(b.dataset.tool!==tool){setPaused(false);setTool(b.dataset.tool)}});
+$('clips').addEventListener('click',e=>{const b=e.target.closest('.clip');if(!b)return;poke();setPaused(false);load(+b.dataset.i)});
+
+// kiosk: after 75 s without a touch, resume the loop; in tour mode, return to the story
+let touched=false, idle=0;
+function poke(){touched=true;clearTimeout(idle);idle=setTimeout(()=>{touched=false; if(tour){location.href='./?tour'} else {setPaused(false)}},75000)}
+['touchstart','pointerdown','keydown'].forEach(ev=>addEventListener(ev,poke,{passive:true}));
+
+// fullscreen on first tap on touch screens (same as the story page), wake lock, offline cache
+try{const app=matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+  if(!app&&/github\.io$/.test(location.hostname)&&matchMedia('(pointer:coarse)').matches&&document.documentElement.requestFullscreen){
+    addEventListener('pointerup',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})},{passive:true})}}catch(e){}
+try{navigator.wakeLock?.request('screen').catch(()=>{})}catch(e){}
+try{if('serviceWorker' in navigator&&location.protocol==='https:'&&/github\.io$/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+
+renderList(); load(0);
+</script>
+</body>
+</html>
