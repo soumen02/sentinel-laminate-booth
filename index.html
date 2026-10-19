@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Laminate by Sentinel: see what changes between MS MRI scans.">
 <meta name="theme-color" content="#0E1112">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Laminate · See What Changes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -347,6 +353,11 @@ document.addEventListener('visibilitychange',async()=>{if(tourOn&&document.visib
 layout();
 if(location.hash==='#tour'||new URLSearchParams(location.search).has('tour'))startTour();
 try{if('serviceWorker' in navigator&&location.protocol==='https:'&&/github\.io$/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+// kiosk: on a touch screen, go fullscreen on the first tap (hides Chrome's address bar) unless already launched as an installed app
+try{const app=matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+  if(!app&&/github\.io$/.test(location.hostname)&&matchMedia('(pointer:coarse)').matches&&document.documentElement.requestFullscreen){
+    const fs=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})};
+    addEventListener('pointerup',fs,{passive:true})}}catch(e){}
 // warm image decode so layers never pop in mid-scroll
 for(const im of world.querySelectorAll('img'))im.decode&&im.decode().catch(()=>{});
 </script>

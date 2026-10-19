@@ -1,8 +1,11 @@
 // Offline cache for the booth screen: the page keeps working if the expo Wi-Fi drops.
-const CACHE='laminate-booth-v2';
+const CACHE='laminate-booth-v3';
 const PRECACHE=[
   "./",
   "./index.html",
+  "./manifest.webmanifest",
+  "./icon-192.png",
+  "./icon-512.png",
   "./assets/cloud_00.webp",
   "./assets/cloud_01.webp",
   "./assets/cloud_02.webp",
